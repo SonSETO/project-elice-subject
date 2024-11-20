@@ -5,7 +5,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { IAuthService } from './interface/auth.service.interface';
 import { LoginDto } from './dto/login.dto';
 
-@ApiTags('인증(Authentication)')
+@ApiTags('인증')
 @Controller('auth')
 export class AuthController {
   constructor(
