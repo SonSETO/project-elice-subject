@@ -61,7 +61,7 @@ export class AuthController {
         },
         code: {
           type: 'string',
-          example: 'ABC123',
+          example: '123456',
           description: '이메일로 발송된 인증 코드',
         },
       },
