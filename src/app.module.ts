@@ -24,6 +24,7 @@ import { UserModule } from './users/users.module';
 import { CustomLoggerService } from './common/logger.service';
 import { LoggerModule } from './common/logger.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -70,6 +71,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
     AuthModule,
     ImagesModule,
     OrderModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService, CustomLoggerService],
