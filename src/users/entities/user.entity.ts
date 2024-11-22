@@ -22,7 +22,7 @@ export class User extends BaseTable {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.user,
+    default: UserRole.USER,
   })
   userRole: UserRole;
 

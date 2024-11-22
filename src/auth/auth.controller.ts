@@ -5,6 +5,9 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { IAuthService } from './interface/auth.service.interface';
 import { LoginDto } from './dto/login.dto';
 
+/*
+  바디 2개 받는 거, 스웨거 설명 좀 더 상세하게, 추상화 때린거 타입 맞춰서 스키마쪽 type:createDto로
+*/
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {

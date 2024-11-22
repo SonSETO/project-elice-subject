@@ -1,31 +1,31 @@
-const env = 'ENV';
-const dbType = 'DB_TYPE';
-const dbHOST = 'DB_HOST';
-const dbPORT = 'DB_PORT';
-const dbUSERNAME = 'DB_USERNAME';
-const dbPASSWORD = 'DB_PASSWORD';
-const dbDATABASE = 'DB_DATABASE';
-const hashRounds = 'HASH_ROUNDS';
-const accessTokenSecret = 'ACCESS_TOKEN_SECRET';
-const refreshTokenSecret = 'REFRESH_TOKEN_SECRET';
-const smtpHost = 'SMTP_HOST';
-const smtpPort = 'SMTP_PORT';
-const googleEmail = 'GOOGLE_EMAIL';
-const googleEmailPassword = 'GOOGLE_EMAIL_PASSWORD';
+const ENV = 'ENV';
+const DB_TYPE = 'DB_TYPE';
+const DB_HOST = 'DB_HOST';
+const DB_PORT = 'DB_PORT';
+const DB_USERNAME = 'DB_USERNAME';
+const DB_PASSWORD = 'DB_PASSWORD';
+const DB_DATABASE = 'DB_DATABASE';
+const HASH_ROUNDS = 'HASH_ROUNDS';
+const ACCESS_TOKEN_SECRET = 'ACCESS_TOKEN_SECRET';
+const REFRESH_TOKEN_SECRET = 'REFRESH_TOKEN_SECRET';
+const SMTP_HOST = 'SMTP_HOST';
+const SMTP_PORT = 'SMTP_PORT';
+const GOOGLE_EMAIL = 'GOOGLE_EMAIL';
+const GOOGLE_EMAIL_PASSWORD = 'GOOGLE_EMAIL_PASSWORD';
 
 export const envVariableKeys = {
-  env,
-  dbType,
-  dbHOST,
-  dbPORT,
-  dbUSERNAME,
-  dbPASSWORD,
-  dbDATABASE,
-  hashRounds,
-  accessTokenSecret,
-  refreshTokenSecret,
-  smtpHost,
-  smtpPort,
-  googleEmail,
-  googleEmailPassword,
+  ENV,
+  DB_TYPE,
+  DB_HOST,
+  DB_PORT,
+  DB_USERNAME,
+  DB_PASSWORD,
+  DB_DATABASE,
+  HASH_ROUNDS,
+  ACCESS_TOKEN_SECRET,
+  REFRESH_TOKEN_SECRET,
+  SMTP_HOST,
+  SMTP_PORT,
+  GOOGLE_EMAIL,
+  GOOGLE_EMAIL_PASSWORD,
 };

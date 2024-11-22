@@ -13,6 +13,7 @@ import { Cache, CACHE_MANAGER } from '@nestjs/cache-manager';
 import { MailerService } from '@nestjs-modules/mailer';
 import { UserRole } from 'src/common/utils/enum/user-enum';
 import { CustomLoggerService } from 'src/common/logger.service';
+import { hashPassword } from 'src/common/utils/hashpassword.util';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -81,6 +82,8 @@ export class AuthService implements IAuthService {
       throw new BadRequestException('인증 코드가 일치하지 않습니다.');
     }
 
+    await this.cacheManager.set(`${email}_verified`, true, { ttl: 300 } as any);
+
     await this.cacheManager.del(email);
     this.logger.log(`인증 코드 검증 성공: ${email}`);
   }
@@ -90,9 +93,8 @@ export class AuthService implements IAuthService {
     const { email, password, userGender } = createUserDto;
     this.logger.log(`회원가입 요청: ${email}`);
 
-    // 중복체크 해주면서 이메일 센딩, 인증코드 발송 5분제한 Redis사용?
-    // 일단은 일반적으로 진행
-    const isVerified = await this.cacheManager.get(email);
+    // 인증 상태 확인
+    const isVerified = await this.cacheManager.get(`${email}_verified`);
     if (!isVerified) {
       this.logger.warn(`이메일 인증 미완료: ${email}`);
       throw new BadRequestException('이메일 인증이 완료되지 않았습니다.');
@@ -104,12 +106,9 @@ export class AuthService implements IAuthService {
       throw new BadRequestException('이미 가입된 이메일입니다!');
     }
 
-    const hashedPassword = await bcrypt.hash(
-      password,
-      this.configService.get<number>(envVariableKeys.hashRounds),
-    );
+    const hashedPassword = await hashPassword(password, this.configService);
 
-    // 컨트롤단에 올려라
+    // 컨트롤단에 올려보기
     if (password !== passwordConfirm) {
       this.logger.warn('비밀번호 불일치');
       throw new BadRequestException('비밀번호와 재확인이 일치하지 않습니다.');
@@ -118,7 +117,7 @@ export class AuthService implements IAuthService {
     await this.userRepository.save({
       email,
       password: hashedPassword,
-      userRole: UserRole.user,
+      userRole: UserRole.USER,
       userGender,
     });
 

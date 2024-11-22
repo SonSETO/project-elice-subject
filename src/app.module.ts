@@ -44,12 +44,12 @@ import { AdminModule } from './admin/admin.module';
     }),
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
-        type: configService.get<string>(envVariableKeys.dbType) as 'mysql',
-        host: configService.get<string>(envVariableKeys.dbHOST),
-        port: configService.get<number>(envVariableKeys.dbPORT),
-        username: configService.get<string>(envVariableKeys.dbUSERNAME),
+        type: configService.get<string>(envVariableKeys.DB_TYPE) as 'mysql',
+        host: configService.get<string>(envVariableKeys.DB_HOST),
+        port: configService.get<number>(envVariableKeys.DB_PORT),
+        username: configService.get<string>(envVariableKeys.DB_USERNAME),
 
-        database: configService.get<string>(envVariableKeys.dbDATABASE),
+        database: configService.get<string>(envVariableKeys.DB_DATABASE),
         entities: [
           User,
           Address,

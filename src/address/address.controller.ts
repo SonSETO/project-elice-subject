@@ -41,16 +41,7 @@ export class AddressController {
   @ApiResponse({
     status: 201,
     description: '배송지가 성공적으로 추가되었습니다.',
-    schema: {
-      example: {
-        id: 1,
-        recipientName: '홍길동',
-        contactNumber: '010-1234-5678',
-        addressName: '집',
-        address: '서울특별시 강남구',
-        isDefault: true,
-      },
-    },
+    type: CreateAddressDto,
   })
   @ApiResponse({
     status: 400,
@@ -71,26 +62,7 @@ export class AddressController {
   @ApiResponse({
     status: 200,
     description: '배송지 목록이 성공적으로 조회되었습니다.',
-    schema: {
-      example: [
-        {
-          id: 1,
-          recipientName: '홍길동',
-          contactNumber: '010-1234-5678',
-          addressName: '집',
-          address: '서울특별시 강남구',
-          isDefault: true,
-        },
-        {
-          id: 2,
-          recipientName: '김철수',
-          contactNumber: '010-5678-1234',
-          addressName: '회사',
-          address: '서울특별시 중구',
-          isDefault: false,
-        },
-      ],
-    },
+    type: CreateAddressDto,
   })
   @ApiResponse({ status: 404, description: '등록된 배송지가 없습니다.' })
   @Get(':userId')
@@ -110,12 +82,7 @@ export class AddressController {
   @ApiResponse({
     status: 200,
     description: '배송지가 성공적으로 삭제되었습니다.',
-    schema: {
-      example: {
-        success: true,
-        deletedAddressId: 1,
-      },
-    },
+    type: CreateAddressDto,
   })
   @ApiResponse({
     status: 404,
@@ -141,16 +108,7 @@ export class AddressController {
   @ApiResponse({
     status: 200,
     description: '기본 배송지가 성공적으로 설정되었습니다.',
-    schema: {
-      example: {
-        id: 1,
-        recipientName: '홍길동',
-        contactNumber: '010-1234-5678',
-        addressName: '집',
-        address: '서울특별시 강남구',
-        isDefault: true,
-      },
-    },
+    type: CreateAddressDto,
   })
   @ApiResponse({
     status: 404,
