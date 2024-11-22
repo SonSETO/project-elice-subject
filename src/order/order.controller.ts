@@ -7,6 +7,7 @@ import {
   Inject,
   UseGuards,
   UseInterceptors,
+  Put,
 } from '@nestjs/common';
 
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -23,6 +24,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { OrderStatus } from 'src/common/utils/enum/order.status-enum';
 
 @ApiTags('주문 관리')
 @Controller('order')
@@ -173,5 +175,35 @@ export class OrderController {
   @Get('details/:orderId')
   async getOrderDetails(@Param('orderId') orderId: number) {
     return this.orderService.getOrderDetails(orderId);
+  }
+
+  @ApiOperation({
+    summary: '주문 상태 업데이트',
+    description: '주문의 상태를 업데이트합니다.',
+  })
+  @ApiParam({
+    name: 'orderId',
+    description: '주문 ID',
+    example: 12,
+  })
+  @ApiParam({
+    name: 'status',
+    description: '주문 상태',
+    example: '배송 중',
+  })
+  @ApiResponse({
+    status: 200,
+    description: '주문 상태가 성공적으로 업데이트되었습니다.',
+  })
+  @ApiResponse({
+    status: 404,
+    description: '주문 정보를 찾을 수 없습니다.',
+  })
+  @Put(':orderId/status')
+  async updateOrderStatus(
+    @Param('orderId') orderId: number,
+    @Body('status') status: OrderStatus,
+  ) {
+    return this.orderService.updateOrderStatus(orderId, status);
   }
 }

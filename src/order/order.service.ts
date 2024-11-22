@@ -10,12 +10,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Address } from 'src/address/entities/address.entity';
 import { Repository } from 'typeorm';
 import { CustomLoggerService } from 'src/common/logger.service';
+import { OrderRepository } from './order.repository';
+import { OrderStatus } from 'src/common/utils/enum/order.status-enum';
 
 @Injectable()
 export class OrderService implements IOrderService {
   constructor(
-    @Inject('IOrderRepository')
-    private readonly orderRepository: IOrderRepository,
+    @Inject(OrderRepository)
+    private readonly orderRepository: OrderRepository,
     @Inject('IProductRepository')
     private readonly productRepository: IProductRepository,
     @InjectRepository(Address)
@@ -64,15 +66,29 @@ export class OrderService implements IOrderService {
       });
     }
 
-    const order = await this.orderRepository.createOrder(
+    const createdOrder = await this.orderRepository.createOrder(
       userId,
       addressId,
       orderItems,
       totalPrice,
     );
 
-    this.logger.log(`주문 생성 완료: 주문 ID ${order.id}`);
-    return order;
+    const savedOrder = await this.orderRepository.findOne({
+      where: { id: createdOrder.id },
+      relations: ['items', 'items.product', 'address'],
+    });
+
+    if (!savedOrder) {
+      this.logger.error(
+        `주문 ID ${createdOrder.id}를 저장 후 찾을 수 없습니다.`,
+      );
+      throw new NotFoundException(
+        `주문 ID ${createdOrder.id}를 찾을 수 없습니다.`,
+      );
+    }
+
+    this.logger.log(`주문 생성 완료: 주문 ID ${savedOrder.id}`);
+    return savedOrder;
   }
 
   // 유저로 주문한 것 검색
@@ -100,7 +116,7 @@ export class OrderService implements IOrderService {
   }
 
   // 주문상태 변경
-  async updateOrderStatus(orderId: number, status: string): Promise<void> {
+  async updateOrderStatus(orderId: number, status: OrderStatus): Promise<void> {
     this.logger.log(
       `주문 상태 업데이트 요청: 주문 ID ${orderId}, 상태 ${status}`,
     );

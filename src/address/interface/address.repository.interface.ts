@@ -1,7 +1,8 @@
+import { Repository } from 'typeorm';
 import { CreateAddressDto } from '../dto/create-address.dto';
 import { Address } from '../entities/address.entity';
 
-export interface IAddressRepository {
+export interface IAddressRepository extends Repository<Address> {
   createAddress(
     userId: number,
     createAddressDto: CreateAddressDto,

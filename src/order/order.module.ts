@@ -15,11 +15,13 @@ import { UserModule } from 'src/users/users.module';
 import { ProductRepository } from 'src/product/product.repository';
 import { ProductModule } from 'src/product/product.module';
 import { LoggerModule } from 'src/common/logger.module';
+import { CustomRepositoryModule } from 'src/common/custom-repository.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, Address, Product, User]),
     JwtModule.register({}),
+    CustomRepositoryModule.forCustomRepository([OrderRepository]),
     UserModule,
     ProductModule,
     LoggerModule,
@@ -30,15 +32,12 @@ import { LoggerModule } from 'src/common/logger.module';
       provide: 'IOrderService',
       useClass: OrderService,
     },
-    {
-      provide: 'IOrderRepository',
-      useClass: OrderRepository,
-    },
+
     // {
     //   provide: 'IProductRepository',
     //   useClass: ProductRepository,
     // },
   ],
-  exports: ['IOrderService', 'IOrderRepository'],
+  exports: ['IOrderService'],
 })
 export class OrderModule {}

@@ -9,12 +9,14 @@ import { Address } from './entities/address.entity';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from 'src/users/users.module';
 import { LoggerModule } from 'src/common/logger.module';
+import { CustomRepositoryModule } from 'src/common/custom-repository.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Product, Address]),
+    TypeOrmModule.forFeature([User, Product]),
     JwtModule.register({}),
     UserModule,
+    CustomRepositoryModule.forCustomRepository([AddressRepository]),
     LoggerModule,
   ],
   controllers: [AddressController],
@@ -22,10 +24,6 @@ import { LoggerModule } from 'src/common/logger.module';
     {
       provide: 'IAddressService',
       useClass: AddressService,
-    },
-    {
-      provide: 'IAddressRepository',
-      useClass: AddressRepository,
     },
   ],
   exports: ['IAddressService'],

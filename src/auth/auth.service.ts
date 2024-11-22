@@ -109,8 +109,9 @@ export class AuthService implements IAuthService {
       this.configService.get<number>(envVariableKeys.hashRounds),
     );
 
+    // 컨트롤단에 올려라
     if (password !== passwordConfirm) {
-      this.logger.warn(`비밀번호 불일치: ${email}`);
+      this.logger.warn('비밀번호 불일치');
       throw new BadRequestException('비밀번호와 재확인이 일치하지 않습니다.');
     }
 

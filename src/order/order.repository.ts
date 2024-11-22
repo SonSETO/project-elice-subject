@@ -5,14 +5,13 @@ import { Order } from './entities/order.entity';
 import { IOrderRepository } from './interface/order-repository.interface';
 import { OrderStatus } from 'src/common/utils/enum/order.status-enum';
 import { OrderItem } from './entities/order-item.entity';
+import { CustomRepository } from 'src/common/custom-repository.decorator';
 
-@Injectable()
-export class OrderRepository implements IOrderRepository {
-  constructor(
-    @InjectRepository(Order)
-    private readonly orderRepository: Repository<Order>,
-  ) {}
-
+@CustomRepository(Order)
+export class OrderRepository
+  extends Repository<Order>
+  implements IOrderRepository
+{
   async createOrder(
     userId: number,
     addressId: number,
@@ -20,7 +19,7 @@ export class OrderRepository implements IOrderRepository {
     totalPrice: number,
   ): Promise<Order> {
     try {
-      const order = this.orderRepository.create({
+      const order = this.create({
         user: { id: userId },
         address: { id: addressId },
         orderDate: new Date(),
@@ -33,7 +32,7 @@ export class OrderRepository implements IOrderRepository {
       */
       // 이부분은 때려죽어도 안되서 gpt돌렸습니다
       order.items = items.map((item) =>
-        this.orderRepository.manager.create(OrderItem, {
+        this.manager.create(OrderItem, {
           product: { id: item.product.id },
           quantity: item.quantity,
           unitPrice: item.unitPrice,
@@ -43,9 +42,9 @@ export class OrderRepository implements IOrderRepository {
 
       //
 
-      const savedOrder = await this.orderRepository.save(order);
+      const savedOrder = await this.save(order);
 
-      return this.orderRepository.findOne({
+      return this.findOne({
         where: { id: savedOrder.id },
         relations: ['items', 'items.product', 'address'],
       });
@@ -55,7 +54,7 @@ export class OrderRepository implements IOrderRepository {
   }
 
   async findOrdersByUser(userId: number): Promise<Order[]> {
-    return this.orderRepository.find({
+    return this.find({
       where: { user: { id: userId } },
       relations: ['items', 'items.product', 'address'],
       order: { orderDate: 'DESC' },
@@ -63,15 +62,14 @@ export class OrderRepository implements IOrderRepository {
   }
 
   async getOrderDetails(orderId: number): Promise<Order> {
-    return this.orderRepository.findOneOrFail({
+    return this.findOneOrFail({
       where: { id: orderId },
       relations: ['items', 'items.product', 'address'],
     });
   }
 
   async updateOrderStatus(orderId: number, status: OrderStatus): Promise<void> {
-    await this.orderRepository
-      .createQueryBuilder()
+    await this.createQueryBuilder()
       .update(Order)
       .set({ orderStatus: status })
       .where('id = :orderId', { orderId })
@@ -79,8 +77,7 @@ export class OrderRepository implements IOrderRepository {
   }
 
   async deleteOrder(orderId: number): Promise<void> {
-    await this.orderRepository
-      .createQueryBuilder()
+    await this.createQueryBuilder()
       .delete()
       .from(Order)
       .where('id = :orderId', { orderId })

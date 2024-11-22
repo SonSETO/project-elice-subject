@@ -2,6 +2,7 @@ import { IsNotEmpty, IsString, IsBoolean, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateAddressDto {
+  //dto 전체적인 유효성 검사 추가
   @ApiProperty({
     description: '수령인 이름',
     example: '홍길동',
@@ -42,4 +43,8 @@ export class CreateAddressDto {
   @IsOptional()
   @IsBoolean()
   isDefault?: boolean;
+
+  // userId:number
+
+  // 컨트롤러 넘길 떄 userId:userId=number
 }

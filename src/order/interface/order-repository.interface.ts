@@ -1,6 +1,8 @@
+import { Repository } from 'typeorm';
 import { Order } from '../entities/order.entity';
+import { OrderStatus } from 'src/common/utils/enum/order.status-enum';
 
-export interface IOrderRepository {
+export interface IOrderRepository extends Repository<Order> {
   createOrder(
     userId: number,
     addressId: number,
@@ -12,7 +14,7 @@ export interface IOrderRepository {
 
   getOrderDetails(orderId: number): Promise<Order>;
 
-  updateOrderStatus(orderId: number, status: string): Promise<void>;
+  updateOrderStatus(orderId: number, status: OrderStatus): Promise<void>;
 
   deleteOrder(orderId: number): Promise<void>;
 }
