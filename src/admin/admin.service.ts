@@ -7,12 +7,6 @@ import { UserRepository } from 'src/users/users.repository';
 import { OrderRepository } from 'src/order/order.repository';
 import { ProductRepository } from 'src/product/product.repository';
 
-interface WeeklyBestProduct {
-  id: number;
-  title: string;
-  totalQuantity: number;
-}
-
 @Injectable()
 export class AdminService {
   constructor(
