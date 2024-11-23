@@ -90,36 +90,7 @@ export class AuthController {
     description:
       '인증 코드를 확인한 뒤 회원 정보를 입력하여 회원가입을 완료합니다.',
   })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-          example: 'user@example.com',
-          description: '회원가입할 이메일 주소',
-        },
-        password: {
-          type: 'string',
-          example: 'password123',
-          description: '회원가입에 사용할 비밀번호',
-        },
-        passwordConfirm: {
-          type: 'string',
-          example: 'password123',
-          description: '비밀번호 확인',
-        },
-        userGender: {
-          type: 'string',
-          enum: ['남자', '여자'],
-          example: '남자',
-          description: '사용자의 성별',
-        },
-      },
-      required: ['email', 'password', 'passwordConfirm', 'userGender'],
-    },
-  })
+  @ApiBody({ type: CreateUserDto })
   @ApiResponse({
     status: 201,
     description: '회원가입이 성공적으로 완료되었습니다.',
@@ -129,11 +100,8 @@ export class AuthController {
     description: '유효성 검사 실패 또는 이미 존재하는 이메일.',
   })
   @Post('register')
-  async register(
-    @Body() createUserDto: CreateUserDto,
-    @Body('passwordConfirm') passwordConfirm: string,
-  ) {
-    return this.authService.register(createUserDto, passwordConfirm);
+  async register(@Body() createUserDto: CreateUserDto) {
+    return this.authService.register(createUserDto);
   }
 
   @ApiOperation({
@@ -141,23 +109,7 @@ export class AuthController {
     description: '이메일과 비밀번호로 인증을 진행하여 JWT 토큰을 반환합니다.',
   })
   @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        email: {
-          type: 'string',
-          format: 'email',
-          example: 'user@example.com',
-          description: '로그인에 사용할 이메일 주소',
-        },
-        password: {
-          type: 'string',
-          example: 'password123',
-          description: '로그인에 사용할 비밀번호',
-        },
-      },
-      required: ['email', 'password'],
-    },
+    type: LoginDto,
   })
   @ApiResponse({
     status: 200,

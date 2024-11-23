@@ -35,7 +35,7 @@ export class AdminService {
   }
 
   async getTodayOrdersCount(): Promise<number> {
-    this.logger.log('오늘의 주문 갯수 조회 요청');
+    this.logger.log('오늘(00-24)의 주문 갯수 조회 요청');
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));
@@ -46,7 +46,7 @@ export class AdminService {
       },
     });
 
-    this.logger.log(`오늘의 주문 갯수: ${count}`);
+    this.logger.log(`오늘(00-24)의 주문 갯수: ${count}`);
     return count;
   }
 
@@ -68,7 +68,7 @@ export class AdminService {
   }
 
   async getTodayRevenue(): Promise<number> {
-    this.logger.log('금일 매출 합계 조회 요청');
+    this.logger.log('금일(00-24) 매출 합계 조회 요청');
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
     const endOfDay = new Date(today.setHours(23, 59, 59, 999));

@@ -14,12 +14,13 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { UserRole } from 'src/common/utils/enum/user-enum';
 import { CustomLoggerService } from 'src/common/logger.service';
 import { hashPassword } from 'src/common/utils/hashpassword.util';
+import { UserRepository } from 'src/users/users.repository';
 
 @Injectable()
 export class AuthService implements IAuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @Inject(UserRepository)
+    private readonly userRepository: UserRepository,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER)
@@ -89,8 +90,8 @@ export class AuthService implements IAuthService {
   }
 
   // 회원가입
-  async register(createUserDto: CreateUserDto, passwordConfirm: string) {
-    const { email, password, userGender } = createUserDto;
+  async register(createUserDto: CreateUserDto) {
+    const { email, password, userGender, passwordConfirm } = createUserDto;
     this.logger.log(`회원가입 요청: ${email}`);
 
     // 인증 상태 확인

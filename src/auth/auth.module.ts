@@ -9,6 +9,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { LoggerModule } from 'src/common/logger.module';
+import { CustomRepositoryModule } from 'src/common/custom-repository.module';
+import { UserRepository } from 'src/users/users.repository';
 
 @Module({
   imports: [
@@ -43,6 +45,7 @@ import { LoggerModule } from 'src/common/logger.module';
       ttl: 300,
       max: 100,
     }),
+    CustomRepositoryModule.forCustomRepository([UserRepository]),
     LoggerModule,
   ],
   controllers: [AuthController],

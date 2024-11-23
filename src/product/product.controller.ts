@@ -31,6 +31,7 @@ import { UserId } from 'src/users/decorator/user-id.decorator';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { CategoryName } from 'src/common/utils/enum/product-enum';
 import { JwtAuthGuard } from 'src/auth/guard/auth.guard';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @ApiTags('상품 관리')
 @Controller('product')
@@ -46,33 +47,7 @@ export class ProductController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: '상품 생성에 필요한 데이터와 이미지',
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: '고급 셔츠' },
-        description: { type: 'string', example: '멋진 고급 셔츠입니다.' },
-        price: { type: 'number', example: 50000 },
-        size: {
-          type: 'string',
-          enum: ['스몰', '미디움', '라지', '엑스라지'],
-          example: '미디움',
-        },
-        productGender: {
-          type: 'string',
-          enum: ['남자', '여자', '남녀공용'],
-          example: '남녀공용',
-        },
-        category: {
-          type: 'string',
-          enum: ['상의', '하의', '코트', '신발', '모자'],
-          example: '상의',
-        },
-        images: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-        },
-      },
-    },
+    type: CreateProductDto,
   })
   @ApiResponse({
     status: 201,
@@ -145,33 +120,7 @@ export class ProductController {
   @ApiParam({ name: 'id', description: '상품 ID', example: 1 })
   @ApiBody({
     description: '수정된 상품 데이터와 이미지 파일',
-    schema: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', example: '업데이트된 셔츠' },
-        description: { type: 'string', example: '업데이트된 멋진 셔츠입니다.' },
-        price: { type: 'number', example: 60000 },
-        size: {
-          type: 'string',
-          enum: ['스몰', '미디움', '라지', '엑스라지'],
-          example: '라지',
-        },
-        productGender: {
-          type: 'string',
-          enum: ['남자', '여자', '남녀공용'],
-          example: '남자',
-        },
-        category: {
-          type: 'string',
-          enum: ['상의', '하의', '코트', '신발', '모자'],
-          example: '코트',
-        },
-        images: {
-          type: 'array',
-          items: { type: 'string', format: 'binary' },
-        },
-      },
-    },
+    type: UpdateProductDto,
   })
   @ApiResponse({
     status: 200,

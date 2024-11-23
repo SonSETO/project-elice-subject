@@ -20,7 +20,7 @@ export class AdminController {
 
   @ApiOperation({
     summary: '신규 가입자 수 조회',
-    description: '오늘 신규 가입자 수를 반환합니다.',
+    description: '오늘(00-24) 신규 가입자 수를 반환합니다.',
   })
   @ApiResponse({
     status: 200,
@@ -34,12 +34,12 @@ export class AdminController {
   }
 
   @ApiOperation({
-    summary: '오늘의 주문 갯수 조회',
-    description: '오늘 생성된 주문 수를 반환합니다.',
+    summary: '오늘(00-24)의 주문 갯수 조회',
+    description: '오늘(00-24) 생성된 주문 수를 반환합니다.',
   })
   @ApiResponse({
     status: 200,
-    description: '오늘의 주문 갯수',
+    description: '오늘(00-24)의 주문 갯수',
     schema: { example: { count: 10 } },
   })
   @Get('today-orders')
@@ -74,8 +74,8 @@ export class AdminController {
   }
 
   @ApiOperation({
-    summary: '금일 매출 합계 조회',
-    description: '오늘 완료된 주문의 매출 합계를 반환합니다.',
+    summary: '금일(00-24) 매출 합계 조회',
+    description: '오늘(00-24) 완료된 주문의 매출 합계를 반환합니다.',
   })
   @ApiResponse({
     status: 200,

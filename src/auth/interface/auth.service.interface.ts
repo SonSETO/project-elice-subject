@@ -1,8 +1,9 @@
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LoginDto } from '../dto/login.dto';
+import { User } from 'src/users/entities/user.entity';
 
 export interface IAuthService {
-  register(createUserDto: CreateUserDto, passwordConfirm: string): Promise<any>;
+  register(createUserDto: CreateUserDto): Promise<User>;
 
   sendAuthMail(email: string): Promise<void>;
 
