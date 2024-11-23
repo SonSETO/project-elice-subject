@@ -56,7 +56,7 @@ export class ProductService implements IProductService {
       createProductDto,
       userId,
     );
-    // const uploadPath = this.configService.get<string>('UPLOAD_PATH')
+
     const images = files.map((file) => {
       const image = new Images();
       image.url = `/uploads/products/${file.filename}`;
@@ -99,7 +99,6 @@ export class ProductService implements IProductService {
       throw new NotFoundException('상품을 찾을 수 없습니다.');
     }
 
-    // 새 이미지 생성
     const newImages: Images[] = files.map((file) => {
       const image = new Images();
       image.url = `/uploads/products/${file.filename}`;
@@ -107,10 +106,8 @@ export class ProductService implements IProductService {
       return image;
     });
 
-    // 이미지 업데이트
     await this.imagesService.updateImages(product.id, newImages);
 
-    // 상품 정보 업데이트
     const updatedProduct = await this.productRepository.updateProduct(
       id,
       updateProductDto,
@@ -130,11 +127,9 @@ export class ProductService implements IProductService {
       throw new NotFoundException('상품을 찾을 수 없습니다.');
     }
 
-    // 이미지 삭제
     this.logger.log(`상품 ID ${id}의 관련 이미지 삭제 요청`);
     await this.imagesRepository.deleteImagesByProductId(id);
 
-    // 상품 삭제
     await this.productRepository.deleteProduct(id);
 
     this.logger.log(`상품 삭제 완료: 상품 ID ${id}`);
