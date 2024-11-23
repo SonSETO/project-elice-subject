@@ -3,14 +3,13 @@ import { Images } from 'src/images/entities/image.entity';
 import { CreateProductDto } from '../dto/create-product.dto';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { CategoryName } from 'src/common/utils/enum/product-enum';
+import { Repository } from 'typeorm';
 
-export interface IProductRepository {
+export interface IProductRepository extends Repository<Product> {
   createProduct(
     createProductDto: CreateProductDto,
     userId: number,
   ): Promise<Product>;
-
-  saveImages(images: Images[]): Promise<void>;
 
   getProductById(id: number): Promise<Product | null>;
 
@@ -22,14 +21,6 @@ export interface IProductRepository {
 
   deleteProduct(id: number): Promise<void>;
 
-  toggleLike(
-    productId: number,
-    userId: number,
-    isLike: boolean,
-  ): Promise<{ likeCountChange: number }>;
-
-  getLikedProductsByUser(userId: number): Promise<Product[]>;
-
   getAllProducts(
     page: number,
     limit: number,
@@ -40,4 +31,12 @@ export interface IProductRepository {
     page: number,
     limit: number,
   ): Promise<{ data: Product[]; meta: any }>;
+
+  // toggleLike(
+  //   productId: number,
+  //   userId: number,
+  //   isLike: boolean,
+  // ): Promise<{ likeCountChange: number }>;
+
+  // getLikedProductsByUser(userId: number): Promise<Product[]>;
 }

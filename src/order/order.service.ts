@@ -12,16 +12,19 @@ import { Repository } from 'typeorm';
 import { CustomLoggerService } from 'src/common/logger.service';
 import { OrderRepository } from './order.repository';
 import { OrderStatus } from 'src/common/utils/enum/order.status-enum';
+import { ProductRepository } from 'src/product/product.repository';
+import { AddressRepository } from 'src/address/address.repository';
 
 @Injectable()
 export class OrderService implements IOrderService {
   constructor(
     @Inject(OrderRepository)
     private readonly orderRepository: OrderRepository,
-    @Inject('IProductRepository')
-    private readonly productRepository: IProductRepository,
-    @InjectRepository(Address)
-    private readonly addressRepository: Repository<Address>,
+    @Inject(ProductRepository)
+    private readonly productRepository: ProductRepository,
+    @Inject(AddressRepository)
+    private readonly addressRepository: AddressRepository,
+
     private readonly logger: CustomLoggerService,
   ) {}
 

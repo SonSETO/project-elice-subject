@@ -18,14 +18,23 @@ import { IProductRepository } from './interface/product.repository.interface';
 import { ConfigService } from '@nestjs/config';
 import { IUserRepository } from 'src/users/interface/user.repository.interface';
 import { CustomLoggerService } from 'src/common/logger.service';
+import { UserRepository } from 'src/users/users.repository';
+import { ProductRepository } from './product.repository';
+import { ImagesRepository } from 'src/images/images.repository';
+import { ImagesService } from 'src/images/images.service';
+import { IImagesService } from 'src/images/interface/images.service.interface';
 
 @Injectable()
 export class ProductService implements IProductService {
   constructor(
-    @Inject('IProductRepository')
-    private readonly productRepository: IProductRepository,
-    @Inject('IUserRepository')
-    private readonly userRepository: IUserRepository,
+    @Inject(ProductRepository)
+    private readonly productRepository: ProductRepository,
+    @Inject(UserRepository)
+    private readonly userRepository: UserRepository,
+    @Inject(ImagesRepository)
+    private readonly imagesRepository: ImagesRepository,
+    @Inject('IImagesService')
+    private readonly imagesService: IImagesService,
     private readonly configService: ConfigService,
     private readonly logger: CustomLoggerService,
   ) {}
@@ -55,7 +64,7 @@ export class ProductService implements IProductService {
       return image;
     });
 
-    await this.productRepository.saveImages(images);
+    await this.imagesRepository.saveImages(images);
 
     this.logger.log('상품 생성 완료', { productId: product.id, userId });
 
@@ -84,17 +93,27 @@ export class ProductService implements IProductService {
   ): Promise<Product> {
     this.logger.log(`상품 업데이트 요청: 상품 ID ${id}`, updateProductDto);
 
-    const images = files.map((file) => {
+    const product = await this.productRepository.getProductById(id);
+    if (!product) {
+      this.logger.warn(`상품 조회 실패: 상품 ID ${id}`);
+      throw new NotFoundException('상품을 찾을 수 없습니다.');
+    }
+
+    // 새 이미지 생성
+    const newImages: Images[] = files.map((file) => {
       const image = new Images();
       image.url = `/uploads/products/${file.filename}`;
-      image.product = { id } as Product;
+      image.product = product;
       return image;
     });
 
+    // 이미지 업데이트
+    await this.imagesService.updateImages(product.id, newImages);
+
+    // 상품 정보 업데이트
     const updatedProduct = await this.productRepository.updateProduct(
       id,
       updateProductDto,
-      images,
     );
 
     this.logger.log(`상품 업데이트 성공: 상품 ID ${id}`, updatedProduct);
@@ -105,46 +124,20 @@ export class ProductService implements IProductService {
   async deleteProduct(id: number): Promise<void> {
     this.logger.log(`상품 삭제 요청: 상품 ID ${id}`);
 
+    const product = await this.productRepository.getProductById(id);
+    if (!product) {
+      this.logger.warn(`상품 조회 실패: 상품 ID ${id}`);
+      throw new NotFoundException('상품을 찾을 수 없습니다.');
+    }
+
+    // 이미지 삭제
+    this.logger.log(`상품 ID ${id}의 관련 이미지 삭제 요청`);
+    await this.imagesRepository.deleteImagesByProductId(id);
+
+    // 상품 삭제
     await this.productRepository.deleteProduct(id);
 
     this.logger.log(`상품 삭제 완료: 상품 ID ${id}`);
-  }
-
-  //상품 좋아요 버튼(없앨까 고민중)
-  async toggleProductLike(
-    productId: number,
-    userId: number,
-    isLike: boolean,
-  ): Promise<{ message: string }> {
-    this.logger.log(
-      `상품 좋아요 상태 변경 요청: 상품 ID ${productId}, 사용자 ID ${userId}, 상태 ${isLike}`,
-    );
-
-    const { likeCountChange } = await this.productRepository.toggleLike(
-      productId,
-      userId,
-      isLike,
-    );
-
-    this.logger.log(
-      `상품 좋아요 상태 변경 완료: 상품 ID ${productId}, 사용자 ID ${userId}, 변경 수 ${likeCountChange}`,
-    );
-
-    return { message: `좋아요 상태가 변경되었습니다: ${likeCountChange}` };
-  }
-
-  // 사용자가 좋아요한 상품 조회
-  async getLikedProducts(userId: number): Promise<Product[]> {
-    this.logger.log(`사용자가 좋아요한 상품 조회 요청: 사용자 ID ${userId}`);
-
-    const likedProducts =
-      await this.productRepository.getLikedProductsByUser(userId);
-
-    this.logger.log(
-      `사용자가 좋아요한 상품 조회 완료: 사용자 ID ${userId}, 상품 수 ${likedProducts.length}`,
-    );
-
-    return likedProducts;
   }
 
   // 모든 상품 가져오기
@@ -185,4 +178,41 @@ export class ProductService implements IProductService {
 
     return result;
   }
+
+  // //상품 좋아요 버튼(없앨까 고민중)
+  // async toggleProductLike(
+  //   productId: number,
+  //   userId: number,
+  //   isLike: boolean,
+  // ): Promise<{ message: string }> {
+  //   this.logger.log(
+  //     `상품 좋아요 상태 변경 요청: 상품 ID ${productId}, 사용자 ID ${userId}, 상태 ${isLike}`,
+  //   );
+
+  //   const { likeCountChange } = await this.productRepository.toggleLike(
+  //     productId,
+  //     userId,
+  //     isLike,
+  //   );
+
+  //   this.logger.log(
+  //     `상품 좋아요 상태 변경 완료: 상품 ID ${productId}, 사용자 ID ${userId}, 변경 수 ${likeCountChange}`,
+  //   );
+
+  //   return { message: `좋아요 상태가 변경되었습니다: ${likeCountChange}` };
+  // }
+
+  // // 사용자가 좋아요한 상품 조회
+  // async getLikedProducts(userId: number): Promise<Product[]> {
+  //   this.logger.log(`사용자가 좋아요한 상품 조회 요청: 사용자 ID ${userId}`);
+
+  //   const likedProducts =
+  //     await this.productRepository.getLikedProductsByUser(userId);
+
+  //   this.logger.log(
+  //     `사용자가 좋아요한 상품 조회 완료: 사용자 ID ${userId}, 상품 수 ${likedProducts.length}`,
+  //   );
+
+  //   return likedProducts;
+  // }
 }

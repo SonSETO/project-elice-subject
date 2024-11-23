@@ -14,6 +14,10 @@ import path, { join } from 'path';
 import { ProductUserLike } from './entities/product-user-like.entity';
 import { ProductRepository } from './product.repository';
 import { LoggerModule } from 'src/common/logger.module';
+import { CustomRepositoryModule } from 'src/common/custom-repository.module';
+import { UserRepository } from 'src/users/users.repository';
+import { ImagesRepository } from 'src/images/images.repository';
+import { ImagesModule } from 'src/images/images.module';
 
 @Module({
   imports: [
@@ -46,9 +50,15 @@ import { LoggerModule } from 'src/common/logger.module';
         fileSize: 5 * 1024 * 1024,
       },
     }),
+    CustomRepositoryModule.forCustomRepository([
+      ProductRepository,
+      UserRepository,
+      ImagesRepository,
+    ]),
     JwtModule.register({}),
     UserModule,
     LoggerModule,
+    ImagesModule,
   ],
   controllers: [ProductController],
   providers: [
@@ -56,11 +66,11 @@ import { LoggerModule } from 'src/common/logger.module';
       provide: 'IProductService',
       useClass: ProductService,
     },
-    {
-      provide: 'IProductRepository',
-      useClass: ProductRepository,
-    },
+    // {
+    //   provide: 'IProductRepository',
+    //   useClass: ProductRepository,
+    // },
   ],
-  exports: ['IProductService', 'IProductRepository', TypeOrmModule],
+  exports: ['IProductService', TypeOrmModule],
 })
 export class ProductModule {}

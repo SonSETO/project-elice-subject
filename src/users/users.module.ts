@@ -9,10 +9,13 @@ import { Order } from 'src/order/entities/order.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { Address } from 'src/address/entities/address.entity';
 import { LoggerModule } from 'src/common/logger.module';
+import { CustomRepositoryModule } from 'src/common/custom-repository.module';
+import { ProductModule } from 'src/product/product.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Order, Product, Address]),
+    TypeOrmModule.forFeature([User]),
+    CustomRepositoryModule.forCustomRepository([UserRepository]),
     LoggerModule,
   ],
   controllers: [UserController],
@@ -21,11 +24,11 @@ import { LoggerModule } from 'src/common/logger.module';
       provide: 'IUserService',
       useClass: UserService,
     },
-    {
-      provide: 'IUserRepository',
-      useClass: UserRepository,
-    },
+    // {
+    //   provide: 'IUserRepository',
+    //   useClass: UserRepository,
+    // },
   ],
-  exports: ['IUserService', 'IUserRepository'],
+  exports: ['IUserService'],
 })
 export class UserModule {}

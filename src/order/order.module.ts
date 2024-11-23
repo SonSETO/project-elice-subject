@@ -16,12 +16,17 @@ import { ProductRepository } from 'src/product/product.repository';
 import { ProductModule } from 'src/product/product.module';
 import { LoggerModule } from 'src/common/logger.module';
 import { CustomRepositoryModule } from 'src/common/custom-repository.module';
+import { AddressRepository } from 'src/address/address.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderItem, Address, Product, User]),
     JwtModule.register({}),
-    CustomRepositoryModule.forCustomRepository([OrderRepository]),
+    CustomRepositoryModule.forCustomRepository([
+      OrderRepository,
+      ProductRepository,
+      AddressRepository,
+    ]),
     UserModule,
     ProductModule,
     LoggerModule,
