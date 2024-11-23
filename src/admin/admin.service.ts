@@ -64,11 +64,13 @@ export class AdminService {
     endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
 
+    // 이부분 다시 이미지추가가 안되는 이유 찾아보기
     const bestSellingProducts = await this.orderRepository
       .createQueryBuilder('order')
       .leftJoin('order.items', 'orderItem')
       .select('orderItem.productId', 'productId')
       .addSelect('SUM(orderItem.quantity)', 'totalQuantity')
+
       .where('order.orderDate BETWEEN :start AND :end', {
         start: startOfWeek,
         end: endOfWeek,
@@ -85,18 +87,26 @@ export class AdminService {
       return [];
     }
 
-    const products = await this.productRepository.findBy({
-      id: In(productIds),
+    // const products = await this.productRepository.findBy({
+    //   id: In(productIds),
+    // });
+
+    const products = await this.productRepository.find({
+      where: { id: In(productIds) },
+      relations: ['images', 'orderItems'],
     });
 
     const results = bestSellingProducts.map((productStats) => {
       const product = products.find(
         (item) => item.id === productStats.productId,
       );
+      const imageUrl = product?.images?.[0]?.url || '이미지 없음';
+
       return {
         id: product?.id || 0,
         title: product?.title || '알 수 없는 상품',
         totalQuantity: parseInt(productStats.totalQuantity, 10),
+        imageUrl,
       };
     });
 

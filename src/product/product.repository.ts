@@ -46,7 +46,7 @@ export class ProductRepository
   async getProductById(id: number): Promise<Product | null> {
     const product = await this.findOne({
       where: { id },
-      relations: ['images', 'likedUsers'],
+      relations: ['images'],
     });
 
     return product;
@@ -79,7 +79,7 @@ export class ProductRepository
   ): Promise<{ data: Product[]; meta: any }> {
     const queryBuilder = this.createQueryBuilder('product')
       .leftJoinAndSelect('product.images', 'images')
-      .orderBy('product.likeCount', 'DESC')
+      // .orderBy('product.likeCount', 'DESC')
       .take(limit)
       .skip((page - 1) * limit);
 
@@ -103,7 +103,7 @@ export class ProductRepository
     const queryBuilder = this.createQueryBuilder('product')
       .where('product.category = :category', { category })
       .leftJoinAndSelect('product.images', 'images')
-      .orderBy('product.likeCount', 'DESC')
+      // .orderBy('product.likeCount', 'DESC')
       .take(limit)
       .skip((page - 1) * limit);
 

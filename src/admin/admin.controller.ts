@@ -78,6 +78,11 @@ export class AdminController {
     return products.map((product) => ({
       id: product.id,
       title: product.title,
+      totalQuantity: product.orderItems.reduce(
+        (total, item) => total + item.quantity,
+        0,
+      ),
+      imageUrl: product.images,
     }));
   }
 
