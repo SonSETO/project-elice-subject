@@ -11,7 +11,7 @@ import { diskStorage } from 'multer';
 
 import { v4 as uuidv4 } from 'uuid';
 import path, { join } from 'path';
-import { ProductUserLike } from './entities/product-user-like.entity';
+
 import { ProductRepository } from './product.repository';
 import { LoggerModule } from 'src/common/logger.module';
 import { CustomRepositoryModule } from 'src/common/custom-repository.module';
@@ -21,7 +21,7 @@ import { ImagesModule } from 'src/images/images.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Product, Images, ProductUserLike]),
+    TypeOrmModule.forFeature([Product, Images]),
     MulterModule.register({
       storage: diskStorage({
         destination: join(process.cwd(), 'uploads', 'products'),
@@ -66,10 +66,6 @@ import { ImagesModule } from 'src/images/images.module';
       provide: 'IProductService',
       useClass: ProductService,
     },
-    // {
-    //   provide: 'IProductRepository',
-    //   useClass: ProductRepository,
-    // },
   ],
   exports: ['IProductService', TypeOrmModule],
 })

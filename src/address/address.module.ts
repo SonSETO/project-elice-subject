@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/entities/user.entity';
 import { Product } from 'src/product/entities/product.entity';
 import { AddressRepository } from './address.repository';
-import { Address } from './entities/address.entity';
+
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from 'src/users/users.module';
 import { LoggerModule } from 'src/common/logger.module';

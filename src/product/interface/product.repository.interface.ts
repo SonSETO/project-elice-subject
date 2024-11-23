@@ -31,12 +31,4 @@ export interface IProductRepository extends Repository<Product> {
     page: number,
     limit: number,
   ): Promise<{ data: Product[]; meta: any }>;
-
-  // toggleLike(
-  //   productId: number,
-  //   userId: number,
-  //   isLike: boolean,
-  // ): Promise<{ likeCountChange: number }>;
-
-  // getLikedProductsByUser(userId: number): Promise<Product[]>;
 }

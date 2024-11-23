@@ -10,10 +10,19 @@ import { UserModule } from 'src/users/users.module';
 import { OrderModule } from 'src/order/order.module';
 import { ProductModule } from 'src/product/product.module';
 import { LoggerModule } from 'src/common/logger.module';
+import { CustomRepositoryModule } from 'src/common/custom-repository.module';
+import { UserRepository } from 'src/users/users.repository';
+import { ProductRepository } from 'src/product/product.repository';
+import { OrderRepository } from 'src/order/order.repository';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([User, Order, Product]),
+    CustomRepositoryModule.forCustomRepository([
+      ProductRepository,
+      UserRepository,
+      OrderRepository,
+    ]),
     JwtModule,
     UserModule,
     OrderModule,
@@ -21,6 +30,13 @@ import { LoggerModule } from 'src/common/logger.module';
     LoggerModule,
   ],
   controllers: [AdminController],
-  providers: [AdminService],
+  providers: [
+    {
+      provide: 'IAdminService',
+      useClass: AdminService,
+    },
+  ],
 })
 export class AdminModule {}
+
+AdminService;

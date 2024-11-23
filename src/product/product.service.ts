@@ -5,23 +5,22 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource, QueryRunner } from 'typeorm';
+
 import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { Images } from 'src/images/entities/image.entity';
 import { IProductService } from './interface/product.interface';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductUserLike } from './entities/product-user-like.entity';
+
 import { CategoryName } from 'src/common/utils/enum/product-enum';
-import { IProductRepository } from './interface/product.repository.interface';
+
 import { ConfigService } from '@nestjs/config';
-import { IUserRepository } from 'src/users/interface/user.repository.interface';
+
 import { CustomLoggerService } from 'src/common/logger.service';
 import { UserRepository } from 'src/users/users.repository';
 import { ProductRepository } from './product.repository';
 import { ImagesRepository } from 'src/images/images.repository';
-import { ImagesService } from 'src/images/images.service';
+
 import { IImagesService } from 'src/images/interface/images.service.interface';
 
 @Injectable()
@@ -173,41 +172,4 @@ export class ProductService implements IProductService {
 
     return result;
   }
-
-  // //상품 좋아요 버튼(없앨까 고민중)
-  // async toggleProductLike(
-  //   productId: number,
-  //   userId: number,
-  //   isLike: boolean,
-  // ): Promise<{ message: string }> {
-  //   this.logger.log(
-  //     `상품 좋아요 상태 변경 요청: 상품 ID ${productId}, 사용자 ID ${userId}, 상태 ${isLike}`,
-  //   );
-
-  //   const { likeCountChange } = await this.productRepository.toggleLike(
-  //     productId,
-  //     userId,
-  //     isLike,
-  //   );
-
-  //   this.logger.log(
-  //     `상품 좋아요 상태 변경 완료: 상품 ID ${productId}, 사용자 ID ${userId}, 변경 수 ${likeCountChange}`,
-  //   );
-
-  //   return { message: `좋아요 상태가 변경되었습니다: ${likeCountChange}` };
-  // }
-
-  // // 사용자가 좋아요한 상품 조회
-  // async getLikedProducts(userId: number): Promise<Product[]> {
-  //   this.logger.log(`사용자가 좋아요한 상품 조회 요청: 사용자 ID ${userId}`);
-
-  //   const likedProducts =
-  //     await this.productRepository.getLikedProductsByUser(userId);
-
-  //   this.logger.log(
-  //     `사용자가 좋아요한 상품 조회 완료: 사용자 ID ${userId}, 상품 수 ${likedProducts.length}`,
-  //   );
-
-  //   return likedProducts;
-  // }
 }

@@ -11,7 +11,6 @@ import { AddressModule } from './address/address.module';
 import { Address } from './address/entities/address.entity';
 import { ProductModule } from './product/product.module';
 
-import { ProductUserLike } from './product/entities/product-user-like.entity';
 import { Product } from './product/entities/product.entity';
 
 import { AuthModule } from './auth/auth.module';
@@ -50,16 +49,7 @@ import { AdminModule } from './admin/admin.module';
         username: configService.get<string>(envVariableKeys.DB_USERNAME),
 
         database: configService.get<string>(envVariableKeys.DB_DATABASE),
-        entities: [
-          User,
-          Address,
-          ProductUserLike,
-          Product,
-
-          Images,
-          Order,
-          OrderItem,
-        ],
+        entities: [User, Address, Product, Images, Order, OrderItem],
         synchronize: true,
       }),
       inject: [ConfigService],

@@ -5,7 +5,7 @@ import { Product } from './entities/product.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { Images } from 'src/images/entities/image.entity';
-import { ProductUserLike } from './entities/product-user-like.entity';
+
 import { CategoryName } from 'src/common/utils/enum/product-enum';
 import { IProductRepository } from './interface/product.repository.interface';
 import { CustomRepository } from 'src/common/custom-repository.decorator';
@@ -118,43 +118,4 @@ export class ProductRepository
       },
     };
   }
-
-  // async toggleLike(
-  //   productId: number,
-  //   userId: number,
-  //   isLike: boolean,
-  // ): Promise<{ likeCountChange: number }> {
-  //   const likeRecord = await this.productUserLikeRepository.findOne({
-  //     where: { product: { id: productId }, user: { id: userId } },
-  //   });
-
-  //   if (likeRecord && likeRecord.isLike === isLike) {
-  //     await this.productUserLikeRepository.remove(likeRecord);
-  //     return { likeCountChange: -1 };
-  //   }
-
-  //   if (likeRecord) {
-  //     likeRecord.isLike = isLike;
-  //     await this.productUserLikeRepository.save(likeRecord);
-  //     return { likeCountChange: isLike ? 1 : -1 };
-  //   }
-
-  //   await this.productUserLikeRepository.save({
-  //     product: { id: productId },
-  //     user: { id: userId },
-  //     isLike,
-  //   });
-  //   return { likeCountChange: 1 };
-  // }
-
-  // async getLikedProductsByUser(userId: number): Promise<Product[]> {
-  //   const likedProducts = await this.productUserLikeRepository
-  //     .createQueryBuilder('pul')
-  //     .leftJoinAndSelect('pul.product', 'product')
-  //     .where('pul.userId = :userId', { userId })
-  //     .andWhere('pul.isLike = :isLike', { isLike: true })
-  //     .getMany();
-
-  //   return likedProducts.map((like) => like.product);
-  // }
 }

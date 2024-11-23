@@ -1,20 +1,28 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
-import { User } from 'src/users/entities/user.entity';
-import { Order } from 'src/order/entities/order.entity';
-import { Product } from 'src/product/entities/product.entity';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { Between, In } from 'typeorm';
+
 import { CustomLoggerService } from 'src/common/logger.service';
+import { UserRepository } from 'src/users/users.repository';
+import { OrderRepository } from 'src/order/order.repository';
+import { ProductRepository } from 'src/product/product.repository';
+
+interface WeeklyBestProduct {
+  id: number;
+  title: string;
+  totalQuantity: number;
+}
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(Order)
-    private readonly orderRepository: Repository<Order>,
-    @InjectRepository(Product)
-    private readonly productRepository: Repository<Product>,
+    @Inject(UserRepository)
+    private readonly userRepository: UserRepository,
+    @Inject(OrderRepository)
+    private readonly orderRepository: OrderRepository,
+    @Inject(ProductRepository)
+    private readonly productRepository: ProductRepository,
+
     private readonly logger: CustomLoggerService,
   ) {}
 
@@ -50,21 +58,61 @@ export class AdminService {
     return count;
   }
 
-  async getTopLikedProducts(limit: number): Promise<Product[]> {
-    this.logger.log(`가장 많이 좋아요가 눌린 상품 조회 요청 (limit: ${limit})`);
-    const products = await this.productRepository.find({
-      order: {
-        likeCount: 'DESC',
-      },
-      take: limit,
+  async getWeeklyBestProducts(
+    limit: number,
+  ): Promise<{ id: number; title: string; totalQuantity: number }[]> {
+    this.logger.log(`금주의 베스트 상품 조회 요청 (limit: ${limit})`);
+
+    const now = new Date();
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
+    startOfWeek.setHours(0, 0, 0, 0);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    const bestSellingProducts = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoin('order.items', 'orderItem')
+      .select('orderItem.productId', 'productId')
+      .addSelect('SUM(orderItem.quantity)', 'totalQuantity')
+      .where('order.orderDate BETWEEN :start AND :end', {
+        start: startOfWeek,
+        end: endOfWeek,
+      })
+      .groupBy('orderItem.productId')
+      .orderBy('totalQuantity', 'DESC')
+      .limit(limit)
+      .getRawMany();
+
+    const productIds = bestSellingProducts.map((item) => item.productId);
+
+    if (productIds.length === 0) {
+      this.logger.log('금주 동안 주문된 상품이 없습니다.');
+      return [];
+    }
+
+    const products = await this.productRepository.findBy({
+      id: In(productIds),
+    });
+
+    const results = bestSellingProducts.map((productStats) => {
+      const product = products.find(
+        (item) => item.id === productStats.productId,
+      );
+      return {
+        id: product?.id || 0,
+        title: product?.title || '알 수 없는 상품',
+        totalQuantity: parseInt(productStats.totalQuantity, 10),
+      };
     });
 
     this.logger.log(
-      `가장 많이 좋아요가 눌린 상품: ${products
-        .map((product) => `${product.title} (좋아요: ${product.likeCount})`)
+      `금주의 베스트 상품: ${results
+        .map((result) => `${result.title} (주문량: ${result.totalQuantity})`)
         .join(', ')}`,
     );
-    return products;
+
+    return results;
   }
 
   async getTodayRevenue(): Promise<number> {

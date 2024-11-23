@@ -5,7 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ProductUserLike } from './product-user-like.entity';
+
 import { BaseTable } from 'src/common/entity/base-table.entity';
 
 import { Images } from 'src/images/entities/image.entity';
@@ -74,10 +74,6 @@ export class Product extends BaseTable {
     default: 0,
   })
   likeCount: number;
-
-  @Expose()
-  @OneToMany(() => ProductUserLike, (pul) => pul.product)
-  likedUsers: ProductUserLike[];
 
   @Expose()
   @OneToMany(() => Images, (images) => images.product, {
