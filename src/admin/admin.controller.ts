@@ -32,8 +32,8 @@ export class AdminController {
     schema: { example: { count: 5 } },
   })
   @Get('new-users')
-  async getNewUsersCount() {
-    const count = await this.adminService.getNewUsersCount();
+  async getTodayNewUsersCount() {
+    const count = await this.adminService.getTodayNewUsersCount();
     return { count };
   }
 
@@ -53,13 +53,13 @@ export class AdminController {
   }
 
   @ApiOperation({
-    summary: '금주의 베스트 상품 조회',
+    summary: '오늘의 베스트 상품 조회',
     description:
-      '금주 (월요일 00:00 - 일요일 23:59) 동안 판매량 기준으로 상위 N개의 상품을 반환합니다.',
+      '오늘 (00:00 - 23:59) 동안 판매량 기준으로 상위 N개의 상품을 반환합니다.',
   })
   @ApiResponse({
     status: 200,
-    description: '금주의 베스트 상품 리스트',
+    description: '오늘의 베스트 상품 리스트',
     schema: {
       type: 'array',
       items: {
@@ -68,21 +68,25 @@ export class AdminController {
           id: { type: 'number', example: 1 },
           title: { type: 'string', example: '인기 상품' },
           totalQuantity: { type: 'number', example: 150 },
+          imageUrl: {
+            type: 'string',
+            example: 'https://example.com/image.jpg',
+          },
         },
       },
     },
   })
-  @Get('weekly-best-products')
-  async getWeeklyBestProducts(@Query('limit') limit = 5) {
-    const products = await this.adminService.getWeeklyBestProducts(limit);
+  @Get('today-best-products')
+  async getTodayBestProducts(@Query('limit') limit = 5) {
+    const products = await this.adminService.getTodayBestProducts(limit);
     return products.map((product) => ({
       id: product.id,
       title: product.title,
-      totalQuantity: product.orderItems.reduce(
-        (total, item) => total + item.quantity,
-        0,
-      ),
-      imageUrl: product.images,
+      // product에 타입 걍 넣어줄지 따로 할지 고민 일단 이렇게 진행
+      //@ts-ignore
+      totalQuantity: product.totalQuantity,
+      //@ts-ignore
+      imageUrl: product.imageUrl,
     }));
   }
 

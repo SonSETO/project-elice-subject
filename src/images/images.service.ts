@@ -12,6 +12,10 @@ export class ImagesService implements IImagesService {
     private readonly logger: CustomLoggerService,
   ) {}
 
+  /* 
+    save와 update는 시간날 때 다시
+    create -> findOne -> save로
+  */
   async saveImages(images: Images[]): Promise<void> {
     this.logger.log(`이미지 저장 요청: ${images.length}개 이미지`);
     await this.imagesRepository.saveImages(images);

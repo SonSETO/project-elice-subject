@@ -20,7 +20,7 @@ export class AdminService {
     private readonly logger: CustomLoggerService,
   ) {}
 
-  async getNewUsersCount(): Promise<number> {
+  async getTodayNewUsersCount(): Promise<number> {
     this.logger.log('신규 가입자 수 조회 요청');
     const today = new Date();
     const startOfDay = new Date(today.setHours(0, 0, 0, 0));
@@ -52,28 +52,28 @@ export class AdminService {
     return count;
   }
 
-  async getWeeklyBestProducts(
+  async getTodayBestProducts(
     limit: number,
-  ): Promise<{ id: number; title: string; totalQuantity: number }[]> {
-    this.logger.log(`금주의 베스트 상품 조회 요청 (limit: ${limit})`);
+  ): Promise<
+    { id: number; title: string; totalQuantity: number; imageUrl: string }[]
+  > {
+    this.logger.log(`오늘의 베스트 상품 조회 요청 (limit: ${limit})`);
 
-    const now = new Date();
-    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + 1));
-    startOfWeek.setHours(0, 0, 0, 0);
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    endOfWeek.setHours(23, 59, 59, 999);
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-    // 이부분 다시 이미지추가가 안되는 이유 찾아보기
     const bestSellingProducts = await this.orderRepository
       .createQueryBuilder('order')
       .leftJoin('order.items', 'orderItem')
+      .leftJoin('orderItem.product', 'product')
+      .leftJoin('product.images', 'image')
       .select('orderItem.productId', 'productId')
       .addSelect('SUM(orderItem.quantity)', 'totalQuantity')
-
+      .addSelect('MIN(image.url)', 'imageUrl')
       .where('order.orderDate BETWEEN :start AND :end', {
-        start: startOfWeek,
-        end: endOfWeek,
+        start: startOfDay,
+        end: endOfDay,
       })
       .groupBy('orderItem.productId')
       .orderBy('totalQuantity', 'DESC')
@@ -83,13 +83,9 @@ export class AdminService {
     const productIds = bestSellingProducts.map((item) => item.productId);
 
     if (productIds.length === 0) {
-      this.logger.log('금주 동안 주문된 상품이 없습니다.');
+      this.logger.log('오늘 동안 주문된 상품이 없습니다.');
       return [];
     }
-
-    // const products = await this.productRepository.findBy({
-    //   id: In(productIds),
-    // });
 
     const products = await this.productRepository.find({
       where: { id: In(productIds) },
@@ -111,8 +107,11 @@ export class AdminService {
     });
 
     this.logger.log(
-      `금주의 베스트 상품: ${results
-        .map((result) => `${result.title} (주문량: ${result.totalQuantity})`)
+      `오늘의 베스트 상품: ${results
+        .map(
+          (result) =>
+            `${result.title} (주문량: ${result.totalQuantity}, 이미지: ${result.imageUrl})`,
+        )
         .join(', ')}`,
     );
 

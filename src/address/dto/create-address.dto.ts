@@ -54,7 +54,7 @@ export class CreateAddressDto {
   @IsBoolean({ message: '기본 배송지 여부는 true 또는 false 값이어야 합니다.' })
   isDefault?: boolean;
 
+  // 이부분 피드백 기억이 안남 다시 체크
   // userId:number
-
   // 컨트롤러 넘길 떄 userId:userId=number
 }

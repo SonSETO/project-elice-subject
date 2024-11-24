@@ -119,6 +119,9 @@ export class OrderService implements IOrderService {
   }
 
   // 주문상태 변경
+  /*
+    여기도 가능하다면 update-> fideOne->save로
+  */
   async updateOrderStatus(orderId: number, status: OrderStatus): Promise<void> {
     this.logger.log(
       `주문 상태 업데이트 요청: 주문 ID ${orderId}, 상태 ${status}`,

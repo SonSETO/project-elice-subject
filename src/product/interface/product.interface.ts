@@ -30,12 +30,4 @@ export interface IProductService {
     page: number,
     limit: number,
   ): Promise<{ data: Product[]; meta: any }>;
-
-  // toggleProductLike(
-  //   productId: number,
-  //   userId: number,
-  //   isLike: boolean,
-  // ): Promise<{ message: string }>;
-
-  // getLikedProducts(userId: number): Promise<Product[]>;
 }

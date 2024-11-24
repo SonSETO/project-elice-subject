@@ -16,15 +16,6 @@ export class ProductRepository
   extends Repository<Product>
   implements IProductRepository
 {
-  // constructor(
-  //   @InjectRepository(Product)
-  //   private readonly productRepository: Repository<Product>,
-  //   @InjectRepository(ProductUserLike)
-  //   private readonly productUserLikeRepository: Repository<ProductUserLike>,
-  //   @InjectRepository(Images)
-  //   private readonly imageRepository: Repository<Images>,
-  // ) {}
-
   async createProduct(
     createProductDto: CreateProductDto,
     userId: number,
@@ -79,7 +70,7 @@ export class ProductRepository
   ): Promise<{ data: Product[]; meta: any }> {
     const queryBuilder = this.createQueryBuilder('product')
       .leftJoinAndSelect('product.images', 'images')
-      // .orderBy('product.likeCount', 'DESC')
+
       .take(limit)
       .skip((page - 1) * limit);
 
@@ -103,7 +94,7 @@ export class ProductRepository
     const queryBuilder = this.createQueryBuilder('product')
       .where('product.category = :category', { category })
       .leftJoinAndSelect('product.images', 'images')
-      // .orderBy('product.likeCount', 'DESC')
+
       .take(limit)
       .skip((page - 1) * limit);
 

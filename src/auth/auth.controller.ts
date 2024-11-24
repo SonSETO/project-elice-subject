@@ -5,9 +5,6 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { IAuthService } from './interface/auth.service.interface';
 import { LoginDto } from './dto/login.dto';
 
-/*
-  바디 2개 받는 거, 스웨거 설명 좀 더 상세하게, 추상화 때린거 타입 맞춰서 스키마쪽 type:createDto로
-*/
 @ApiTags('인증')
 @Controller('auth')
 export class AuthController {
@@ -42,7 +39,7 @@ export class AuthController {
     status: 400,
     description: '잘못된 이메일 형식 또는 기타 요청 오류.',
   })
-  @Post('send-mail')
+  @Post('email/send-authentication')
   async sendAuthMail(@Body('email') email: string) {
     await this.authService.sendAuthMail(email);
     return { message: '인증 코드가 성공적으로 발송되었습니다.' };
@@ -76,7 +73,7 @@ export class AuthController {
     status: 400,
     description: '인증 코드가 만료되었거나 코드가 올바르지 않습니다.',
   })
-  @Post('validate-code')
+  @Post('email/verify')
   async validateAuthCode(
     @Body('email') email: string,
     @Body('code') code: string,
