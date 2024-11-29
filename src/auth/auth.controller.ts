@@ -1,6 +1,12 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { Inject } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { IAuthService } from './interface/auth.service.interface';
 import { LoginDto } from './dto/login.dto';
@@ -120,6 +126,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: '잘못된 이메일 또는 비밀번호.' })
   @ApiResponse({ status: 401, description: '권한이 없습니다.' })
+  @ApiBearerAuth()
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);

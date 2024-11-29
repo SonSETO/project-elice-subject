@@ -50,7 +50,15 @@ import { AdminModule } from './admin/admin.module';
 
         database: configService.get<string>(envVariableKeys.DB_DATABASE),
         entities: [User, Address, Product, Images, Order, OrderItem],
-        synchronize: true,
+        synchronize:
+          configService.get<string>(envVariableKeys.ENV) === 'prod'
+            ? false
+            : true,
+        ...(configService.get<string>(envVariableKeys.ENV) === 'prod' && {
+          ssl: {
+            rejectUnauthorized: false,
+          },
+        }),
       }),
       inject: [ConfigService],
     }),

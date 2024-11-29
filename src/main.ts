@@ -22,7 +22,7 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   const config = new DocumentBuilder()
-    .setTitle('API Documentation')
+    .setTitle('project-elice-subject')
     .setDescription('API endpoints for the application')
     .setVersion('1.0')
     .addBearerAuth()
