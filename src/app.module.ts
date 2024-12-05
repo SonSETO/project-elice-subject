@@ -24,6 +24,9 @@ import { CustomLoggerService } from './common/logger.service';
 import { LoggerModule } from './common/logger.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { AdminModule } from './admin/admin.module';
+import { ChatModule } from './chat/chat.module';
+import { Chat } from './chat/entity/chat.entity';
+import { ChatRoom } from './chat/entity/chat-room.entity';
 
 @Module({
   imports: [
@@ -49,7 +52,16 @@ import { AdminModule } from './admin/admin.module';
         username: configService.get<string>(envVariableKeys.DB_USERNAME),
 
         database: configService.get<string>(envVariableKeys.DB_DATABASE),
-        entities: [User, Address, Product, Images, Order, OrderItem],
+        entities: [
+          User,
+          Address,
+          Product,
+          Images,
+          Order,
+          OrderItem,
+          Chat,
+          ChatRoom,
+        ],
         synchronize:
           configService.get<string>(envVariableKeys.ENV) === 'prod'
             ? false
@@ -70,6 +82,7 @@ import { AdminModule } from './admin/admin.module';
     ImagesModule,
     OrderModule,
     AdminModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService, CustomLoggerService],
