@@ -4,11 +4,12 @@ import { Socket } from 'socket.io';
 import { ChatRoom } from './entity/chat-room.entity';
 import { Chat } from './entity/chat.entity';
 import { User } from 'src/users/entities/user.entity';
-import { QueryRunner, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateChatDto } from './dto/create-chat.dto';
 import { plainToClass } from 'class-transformer';
 import { UserRole } from 'src/common/utils/enum/user-enum';
 import { WsException } from '@nestjs/websockets';
+import { CustomLoggerService } from 'src/common/logger.service';
 
 @Injectable()
 export class ChatService {
@@ -21,6 +22,7 @@ export class ChatService {
     private readonly chatRepository: Repository<Chat>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly logger: CustomLoggerService,
   ) {}
 
   registerClient(userId: number, client: Socket) {
@@ -47,67 +49,97 @@ export class ChatService {
   async createMessage(
     payload: { sub: number },
     { message, room }: CreateChatDto,
-    qr: QueryRunner,
   ) {
+    this.logger.log(`Creating message: ${message} for room: ${room}`);
     const user = await this.userRepository.findOne({
-      where: {
-        id: payload.sub,
-      },
+      where: { id: payload.sub },
     });
-    const chatRoom = await this.getOrCreateChatRoom(user, qr, room);
+    if (!user) {
+      this.logger.warn(`User not found: ${payload.sub}`);
+      throw new WsException('User not found');
+    }
 
-    const msgModel = await qr.manager.save(Chat, {
+    const chatRoom = await this.getOrCreateChatRoom(user, room);
+    if (!chatRoom) {
+      this.logger.warn(`ChatRoom not found or created for room: ${room}`);
+      throw new WsException('ChatRoom not found');
+    }
+
+    const msgModel = await this.chatRepository.save({
       author: user,
       message,
       chatRoom,
     });
+    this.logger.log(`Message saved: ${JSON.stringify(msgModel)}`);
 
     const client = this.connectedClients.get(user.id);
+    if (client) {
+      client
+        .to(chatRoom.id.toString())
+        .emit('newMessage', plainToClass(Chat, msgModel));
+      this.logger.log(`New message emitted to room: ${chatRoom.id}`);
+    }
 
-    client
-      .to(chatRoom.id.toString())
-      .emit('newMessage', plainToClass(Chat, msgModel));
-
-    return message;
+    return msgModel;
   }
 
-  async getOrCreateChatRoom(user: User, qr: QueryRunner, room?: number) {
-    if (user.userRole === UserRole.ADMIN) {
-      if (!room) {
-        throw new WsException('어드민은 room 값을 필수로 제공해야합니다.');
-      }
+  // async getOrCreateChatRoom(user: User, room?: number) {
+  //   if (room) {
+  //     const existingRoom = await this.chatRoomRepository.findOne({
+  //       where: { id: room },
+  //     });
+  //     if (existingRoom) {
+  //       return existingRoom;
+  //     }
+  //   }
 
-      return qr.manager.findOne(ChatRoom, {
-        where: { id: room },
+  //   const adminUser = await this.userRepository.findOne({
+  //     where: { userRole: UserRole.ADMIN },
+  //   });
+
+  //   if (!adminUser) {
+  //     throw new WsException('Admin user not found');
+  //   }
+
+  //   const newRoom = await this.chatRoomRepository.save({
+  //     users: [user, adminUser],
+  //   });
+
+  //   [user.id, adminUser.id].forEach((userId) => {
+  //     const client = this.connectedClients.get(userId);
+  //     if (client) {
+  //       client.emit('roomCreated', newRoom.id);
+  //       client.join(newRoom.id.toString());
+  //     }
+  //   });
+
+  //   return newRoom;
+  // }
+  async getOrCreateChatRoom(user: User, roomId?: number) {
+    if (roomId) {
+      const existingRoom = await this.chatRoomRepository.findOne({
+        where: { id: roomId },
         relations: ['users'],
       });
-    }
-
-    let chatRoom = await qr.manager
-      .createQueryBuilder(ChatRoom, 'chatRoom')
-      .innerJoin('chatRoom.users', 'user')
-      .where('user.id = :userId', { userId: user.id })
-      .getOne();
-
-    if (!chatRoom) {
-      const adminUser = await qr.manager.findOne(User, {
-        where: { userRole: UserRole.ADMIN },
-      });
-
-      chatRoom = await this.chatRoomRepository.save({
-        users: [user, adminUser],
-      });
-
-      [user.id, adminUser.id].forEach((userId) => {
-        const client = this.connectedClients.get(userId);
-
-        if (client) {
-          client.emit('roomCreated', chatRoom.id);
-          client.join(chatRoom.id.toString());
+      if (existingRoom) {
+        if (!existingRoom.users.some((u) => u.id === user.id)) {
+          existingRoom.users.push(user);
+          await this.chatRoomRepository.save(existingRoom);
         }
-      });
+        return existingRoom;
+      }
     }
 
-    return chatRoom;
+    const adminUser = await this.userRepository.findOne({
+      where: { userRole: UserRole.ADMIN },
+    });
+    if (!adminUser) {
+      throw new WsException('Admin user not found');
+    }
+
+    const newRoom = this.chatRoomRepository.create({
+      users: [user, adminUser],
+    });
+    return await this.chatRoomRepository.save(newRoom);
   }
 }

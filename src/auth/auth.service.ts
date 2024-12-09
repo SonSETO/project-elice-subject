@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
@@ -14,6 +19,7 @@ import { UserRole } from 'src/common/utils/enum/user-enum';
 import { CustomLoggerService } from 'src/common/logger.service';
 import { hashPassword } from 'src/common/utils/hashpassword.util';
 import { UserRepository } from 'src/users/users.repository';
+import { UserService } from 'src/users/users.service';
 
 @Injectable()
 export class AuthService implements IAuthService {
@@ -26,6 +32,8 @@ export class AuthService implements IAuthService {
     private readonly cacheManager: Cache,
     private readonly mailerService: MailerService,
     private readonly logger: CustomLoggerService,
+    @Inject('IUserService')
+    private readonly userService: UserService,
   ) {}
 
   // 인증 메일 전송
@@ -156,5 +164,36 @@ export class AuthService implements IAuthService {
       message: '로그인 성공',
       accessToken,
     };
+  }
+
+  // 토근검증 재사용
+  async validateToken(authHeader: string): Promise<any> {
+    this.logger.log(`Auth Header Received: ${authHeader}`);
+
+    const [type, token] = authHeader.split(' ');
+    if (type !== 'Bearer' || !token) {
+      this.logger.warn(`Invalid token format: ${authHeader}`);
+      throw new UnauthorizedException('Invalid token format');
+    }
+
+    try {
+      this.logger.log(`Validating token: ${token}`);
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: process.env.ACCESS_TOKEN_SECRET,
+      });
+      this.logger.log(`Token payload: ${JSON.stringify(payload)}`);
+
+      const user = await this.userService.findById(payload.sub);
+      if (!user) {
+        this.logger.warn(`User not found: ${payload.sub}`);
+        throw new UnauthorizedException('Invalid user');
+      }
+
+      this.logger.log(`User validated: ${JSON.stringify(user)}`);
+      return { ...user, sub: payload.sub };
+    } catch (error) {
+      this.logger.error('Token validation failed:', error.message);
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 }

@@ -11,6 +11,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { LoggerModule } from 'src/common/logger.module';
 import { CustomRepositoryModule } from 'src/common/custom-repository.module';
 import { UserRepository } from 'src/users/users.repository';
+import { UserService } from 'src/users/users.service';
+import { WsJwtAuthGuard } from './guard/ws-auth.guard';
 
 @Module({
   imports: [
@@ -50,11 +52,16 @@ import { UserRepository } from 'src/users/users.repository';
   ],
   controllers: [AuthController],
   providers: [
+    WsJwtAuthGuard,
     {
       provide: 'IAuthService',
       useClass: AuthService,
     },
+    {
+      provide: 'IUserService',
+      useClass: UserService,
+    },
   ],
-  exports: ['IAuthService'],
+  exports: ['IAuthService', WsJwtAuthGuard],
 })
 export class AuthModule {}

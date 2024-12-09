@@ -10,4 +10,6 @@ export interface IAuthService {
   validateAuthCode(email: string, code: string): Promise<void>;
 
   login(loginDto: LoginDto): Promise<{ accessToken: string }>;
+
+  validateToken(authHeader: string): Promise<any>;
 }
