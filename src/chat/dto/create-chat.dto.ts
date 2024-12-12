@@ -7,4 +7,12 @@ export class CreateChatDto {
   @IsNumber()
   @IsOptional()
   room?: number;
+
+  @IsNumber()
+  @IsOptional()
+  targetUserId?: number;
+
+  @IsNumber()
+  @IsOptional()
+  otherUserId?: number;
 }

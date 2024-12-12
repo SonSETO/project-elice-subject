@@ -1,6 +1,7 @@
 import { BaseTable } from 'src/common/entity/base-table.entity';
 
 import {
+  Column,
   Entity,
   JoinTable,
   ManyToMany,
@@ -19,6 +20,9 @@ export class ChatRoom extends BaseTable {
   @ManyToMany(() => User, (user) => user.chatRooms)
   @JoinTable()
   users: User[];
+
+  @Column({ unique: true })
+  uniqueKey: string;
 
   @OneToMany(() => Chat, (chat) => chat.chatRoom)
   chats: Chat[];

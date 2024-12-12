@@ -27,10 +27,12 @@ export class ChatService {
 
   registerClient(userId: number, client: Socket) {
     this.connectedClients.set(userId, client);
+    this.logger.log(`Client register : User ID ${userId}`);
   }
 
   removeClient(userId: number) {
     this.connectedClients.delete(userId);
+    this.logger.log(`Client remove : User ID ${userId}`);
   }
 
   async joinUserRooms(user: { sub: number }, client: Socket) {
@@ -44,24 +46,32 @@ export class ChatService {
     chatRooms.forEach((room) => {
       client.join(room.id.toString());
     });
+
+    this.logger.log(`User ID ${user.sub} joined ${chatRooms.length} rooms.`);
   }
 
   async createMessage(
     payload: { sub: number },
-    { message, room }: CreateChatDto,
+    { message, otherUserId }: CreateChatDto,
   ) {
-    this.logger.log(`Creating message: ${message} for room: ${room}`);
+    this.logger.log(
+      `Creating message: ${message} for otherUserId: ${otherUserId}`,
+    );
+
     const user = await this.userRepository.findOne({
       where: { id: payload.sub },
     });
+
     if (!user) {
       this.logger.warn(`User not found: ${payload.sub}`);
       throw new WsException('User not found');
     }
 
-    const chatRoom = await this.getOrCreateChatRoom(user, room);
+    const chatRoom = await this.findOrCreateRoom(user, otherUserId);
     if (!chatRoom) {
-      this.logger.warn(`ChatRoom not found or created for room: ${room}`);
+      this.logger.warn(
+        `ChatRoom not found or created for room: ${otherUserId}`,
+      );
       throw new WsException('ChatRoom not found');
     }
 
@@ -70,76 +80,57 @@ export class ChatService {
       message,
       chatRoom,
     });
-    this.logger.log(`Message saved: ${JSON.stringify(msgModel)}`);
 
-    const client = this.connectedClients.get(user.id);
-    if (client) {
-      client
-        .to(chatRoom.id.toString())
-        .emit('newMessage', plainToClass(Chat, msgModel));
-      this.logger.log(`New message emitted to room: ${chatRoom.id}`);
-    }
+    this.broadcastMessage(chatRoom.id, msgModel);
 
     return msgModel;
   }
 
-  // async getOrCreateChatRoom(user: User, room?: number) {
-  //   if (room) {
-  //     const existingRoom = await this.chatRoomRepository.findOne({
-  //       where: { id: room },
-  //     });
-  //     if (existingRoom) {
-  //       return existingRoom;
-  //     }
-  //   }
+  async findOrCreateRoom(user: User, otherUserId: number) {
+    const userIds = [user.id, otherUserId].sort();
+    const uniqueKey = userIds.join('_');
 
-  //   const adminUser = await this.userRepository.findOne({
-  //     where: { userRole: UserRole.ADMIN },
-  //   });
+    let chatRoom = await this.chatRoomRepository.findOne({
+      where: {
+        uniqueKey,
+      },
+      relations: ['users'],
+    });
 
-  //   if (!adminUser) {
-  //     throw new WsException('Admin user not found');
-  //   }
-
-  //   const newRoom = await this.chatRoomRepository.save({
-  //     users: [user, adminUser],
-  //   });
-
-  //   [user.id, adminUser.id].forEach((userId) => {
-  //     const client = this.connectedClients.get(userId);
-  //     if (client) {
-  //       client.emit('roomCreated', newRoom.id);
-  //       client.join(newRoom.id.toString());
-  //     }
-  //   });
-
-  //   return newRoom;
-  // }
-  async getOrCreateChatRoom(user: User, roomId?: number) {
-    if (roomId) {
-      const existingRoom = await this.chatRoomRepository.findOne({
-        where: { id: roomId },
-        relations: ['users'],
+    if (!chatRoom) {
+      const otherUser = await this.userRepository.findOne({
+        where: { id: otherUserId },
       });
-      if (existingRoom) {
-        if (!existingRoom.users.some((u) => u.id === user.id)) {
-          existingRoom.users.push(user);
-          await this.chatRoomRepository.save(existingRoom);
-        }
-        return existingRoom;
+      if (!otherUser) {
+        throw new WsException('상대방 유저를 찾을 수 없습니다.');
       }
-    }
 
-    const adminUser = await this.userRepository.findOne({
-      where: { userRole: UserRole.ADMIN },
-    });
-    if (!adminUser) {
-      throw new WsException('Admin user not found');
-    }
+      chatRoom = this.chatRoomRepository.create({
+        uniqueKey,
+        users: [user, otherUser],
+      });
 
-    const newRoom = this.chatRoomRepository.create({
-      users: [user, adminUser],
+      chatRoom = await this.chatRoomRepository.save(chatRoom);
+      this.logger.log(`새로운 채팅룸 생성 고유키 : ${uniqueKey}`);
+    } else {
+      this.logger.log(`채팅방과 고유키를 찾을 수 없습니다. : ${uniqueKey}`);
+    }
+    return chatRoom;
+  }
+
+  broadcastMessage(roomId: number, message: Chat) {
+    this.logger.log(
+      `Broadcasting message to room ${roomId}: ${JSON.stringify(message)}`,
+    );
+    const clientIds = Array.from(this.connectedClients.keys());
+    clientIds.forEach((userId) => {
+      const client = this.connectedClients.get(userId);
+      if (client) {
+        client
+          .to(roomId.toString())
+          .emit('newMessage', plainToClass(Chat, message));
+        this.logger.log(`Message sent to room ${roomId}: ${message.message}`);
+      }
     });
-    return await this.chatRoomRepository.save(newRoom);
   }
 }

@@ -23,33 +23,33 @@ export class WsJwtAuthGuard implements CanActivate {
     this.logger.log(`Authorization Header: ${authHeader || 'None'}`);
 
     if (!authHeader) {
-      this.logger.warn('no AuthHeader header found');
+      this.logger.warn(' AuthHeader header를 찾을 수 없습니다');
       throw new UnauthorizedException('토큰이 필요합니다.');
     }
 
     const token = this.extractToken(authHeader);
-    this.logger.log(`Extracted Token : ${token}`);
+    this.logger.log(`추출된 토큰 : ${token}`);
 
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.ACCESS_TOKEN_SECRET,
       });
-      this.logger.log(`Token Payload: ${JSON.stringify(payload)}`);
+      this.logger.log(`토큰 페이로드: ${JSON.stringify(payload)}`);
 
       const user = await this.userService.findById(payload.sub);
       if (!user) {
-        this.logger.warn(`User not found for ID: ${payload.sub}`);
+        this.logger.warn(`해당 ID를 찾을 수 없습니다: ${payload.sub}`);
         throw new UnauthorizedException('유효하지 않은 사용자입니다.');
       }
       this.logger.log(
-        `User authenticated: ${JSON.stringify({ ...user, sub: payload.sub })}`,
+        `유저 인증: ${JSON.stringify({ ...user, sub: payload.sub })}`,
       );
 
       client.data.user = { ...user, sub: payload.sub };
 
       return true;
     } catch (error) {
-      this.logger.error(`JWT Verification Error: ${error.message}`);
+      this.logger.error(`JWT 인증 오류: ${error.message}`);
       throw new UnauthorizedException('유효하지 않은 토큰입니다.');
     }
   }

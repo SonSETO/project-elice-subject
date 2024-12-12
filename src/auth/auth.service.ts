@@ -168,7 +168,7 @@ export class AuthService implements IAuthService {
 
   // 토근검증 재사용
   async validateToken(authHeader: string): Promise<any> {
-    this.logger.log(`Auth Header Received: ${authHeader}`);
+    this.logger.log(`Auth Header 수신: ${authHeader}`);
 
     const [type, token] = authHeader.split(' ');
     if (type !== 'Bearer' || !token) {
@@ -177,11 +177,11 @@ export class AuthService implements IAuthService {
     }
 
     try {
-      this.logger.log(`Validating token: ${token}`);
+      this.logger.log(`유요한 token: ${token}`);
       const payload = await this.jwtService.verifyAsync(token, {
         secret: process.env.ACCESS_TOKEN_SECRET,
       });
-      this.logger.log(`Token payload: ${JSON.stringify(payload)}`);
+      this.logger.log(`토큰 페이로드: ${JSON.stringify(payload)}`);
 
       const user = await this.userService.findById(payload.sub);
       if (!user) {

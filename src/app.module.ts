@@ -27,6 +27,7 @@ import { AdminModule } from './admin/admin.module';
 import { ChatModule } from './chat/chat.module';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -44,6 +45,25 @@ import { ChatRoom } from './chat/entity/chat-room.entity';
         ACCESS_TOKEN_SECRET: Joi.string().required(),
       }),
     }),
+    /*
+      docker로 로컬 설치 후 추후 진행
+      docker run -d --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3-management
+      
+    */
+    // ClientsModule.register([
+    //   {
+    //     name: 'RABBITMQ_SERVICE',
+    //     transport: Transport.RMQ,
+    //     options: {
+    //       urls: ['amqp://localhost:5672'],
+    //       queue: 'seto_queue',
+    //       queueOptions: {
+    //         durable: true,
+    //       },
+    //     },
+    //   },
+    // ]),
+
     TypeOrmModule.forRootAsync({
       useFactory: (configService: ConfigService) => ({
         type: configService.get<string>(envVariableKeys.DB_TYPE) as 'mysql',
